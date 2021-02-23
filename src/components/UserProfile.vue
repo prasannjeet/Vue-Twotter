@@ -1,12 +1,28 @@
 <template>
-  <div className="user-profile">
-    <div className="user-profile__user-panel">
-      <h1 className="user-profile__username">@{{ user.username }}</h1>
+  <div class="user-profile">
+    <div class="user-profile__user-panel">
+      <h1 class="user-profile__username">@{{ user.username }}</h1>
       <div class="user-profile__admin-badge" v-if="this.user.isAdmin">Admin</div>
       <div class="user-profile__admin-badge" v-else>User</div>
-      <div className="user-profile__follower_count">
+      <div class="user-profile__follower_count">
         <strong>Followers: </strong> {{ followers }}
       </div>
+      <form class="user-profile__create-twoot" @submit.prevent="createNewTwoot">
+        <label for=newTwoot><strong>New Twoot</strong></label>
+        <textarea id="newTwoot" rows="4" v-model="this.newTwootContent"/>
+
+        <div class="user-profile__create-twoot-type">
+          <label for="newTwootType"><strong>Type</strong></label>
+          <select id="newTwootType" v-model="selectedTwootType">
+            <option :value="option.value" v-for="(option, index) in twootTypes" :key="index">
+              {{option.name}}
+            </option>
+          </select>
+        </div>
+        <button>
+          Twoot!
+        </button>
+      </form>
     </div>
     <div class="user-profile__twoots-wrapper">
       <TwootItem v-for="twoot in this.user.twoots"
@@ -19,7 +35,7 @@
   </div>
 </template>
 
-<script lang="js">
+<script>
 
 import TwootItem from "@/components/TwootItem";
 
@@ -28,6 +44,18 @@ export default {
   components: {TwootItem},
   data() {
     return {
+      newTwootContent : '',
+      selectedTwootType: 'instant',
+      twootTypes: [
+        {
+          value: 'draft',
+          name: 'Draft'
+        },
+        {
+          value: 'instant',
+          name: 'Instant Twoot'
+        }
+      ],
       followers: 0,
       user: {
         id: 1,
@@ -67,6 +95,15 @@ export default {
     },
     toggleFavourite(id) {
       console.log(`Favourited Tweet #${id}`)
+    },
+    createNewTwoot() {
+      if (this.newTwootContent && this.selectedTwootType !== 'draft') {
+        this.user.twoots.unshift({
+          id: this.user.twoots.length + 1,
+          content: this.newTwootContent
+        });
+        this.newTwootContent = ''; //So that after adding, we delete it from forms!
+      }
     }
   },
   mounted() {
@@ -100,6 +137,12 @@ export default {
   margin-right: auto;
   padding: 0 10px;
   font-weight: bold;
+}
+
+.user-profile__create-twoot {
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 h1 {
